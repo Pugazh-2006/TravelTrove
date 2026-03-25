@@ -1,0 +1,32 @@
+:root {
+  --bg: #f7f9fc;
+  --surface: #ffffff;
+  --surface-soft: #f2f6fb;
+  --text: #1f2a37;
+  --muted: #6b7a90;
+  --border: #d9e2ec;
+  --primary: #3f7ae0;
+  --primary-soft: #eaf1ff;
+  --secondary: #ef8b62;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+a {
+  color: inherit;
+}

@@ -1,55 +1,50 @@
-import Navbar from "./Navbar.jsx"
-import "./App.css"
+import { useEffect, useState } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { onAuthStateChanged } from "firebase/auth";
+import Navbar from "./Navbar";
+import Home from "./Home.jsx";
+import Profile from "./profile.jsx";
+import Login from "./Login.jsx";
+import Blog from "./Blog.jsx";
+import BudgetPlanner from "./BudgetPlanner.jsx";
+import { auth } from "./firebase";
 
 function App() {
+  const [user, setUser] = useState(null);
+  const [loadingAuth, setLoadingAuth] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+      setLoadingAuth(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  if (loadingAuth) {
+    return <p style={{ padding: "80px 20px" }}>Loading...</p>;
+  }
+
   return (
     <>
-      <Navbar />
+      <Navbar user={user} />
 
-      {/* Hero Section */}
-      <section className="hero">
-        <div className="hero-text">
-          <h1>Plan Smart. Travel Cheap.</h1>
-          <p>
-            TravelTrove helps backpackers plan budget-friendly trips
-            with transparent cost estimation.
-          </p>
-          <button className="cta-btn">Start Planning</button>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="features">
-        <div className="feature-card">
-          <h3>Budget Planning</h3>
-          <p>Plan trips based on lowest transport and stay cost.</p>
-        </div>
-        <div className="feature-card">
-          <h3>Backpacker Friendly</h3>
-          <p>Designed only for backpackers and budget travelers.</p>
-        </div>
-        <div className="feature-card">
-          <h3>Cost Transparency</h3>
-          <p>Know the total estimated cost before you travel.</p>
-        </div>
-      </section>
-
-      {/* Gallery Section */}
-      <section className="gallery">
-        <h2>Explore on a Budget</h2>
-        <div className="gallery-grid">
-          <div className="img-box1"></div>
-          <div className="img-box2"></div>
-          <div className="img-box3"></div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="footer">
-        <p>© 2026 TravelTrove | Backpackers Only</p>
-      </footer>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route
+          path="/profile"
+          element={user ? <Profile user={user} /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/login"
+          element={user ? <Navigate to="/profile" replace /> : <Login />}
+        />
+        <Route path="/planner" element={<BudgetPlanner user={user} />} />
+        <Route path="/blog" element={<Blog user={user} />} />
+      </Routes>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

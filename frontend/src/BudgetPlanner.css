@@ -1,0 +1,611 @@
+.budget-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 160, 72, 0.22), transparent 38%),
+    radial-gradient(circle at 95% 0%, rgba(74, 150, 255, 0.16), transparent 36%),
+    #0b1016;
+  color: #f0f5ff;
+  padding: 92px 20px 40px;
+}
+
+.budget-header,
+.planner-wrapper,
+.trip-page {
+  max-width: 1160px;
+  margin: 0 auto;
+}
+
+.budget-header {
+  margin-bottom: 18px;
+}
+
+.budget-kicker {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ffd6b5;
+}
+
+.budget-header h1 {
+  margin: 8px 0 4px;
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+}
+
+.budget-copy {
+  margin: 0;
+  color: #a9bad0;
+}
+
+.trip-row {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.trip-card {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 14px;
+  min-height: 150px;
+  color: #eaf1ff;
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.trip-create-form {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  place-content: initial;
+  text-align: left;
+}
+
+.trip-item-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px;
+  text-align: left;
+}
+
+.trip-open-btn {
+  border: none;
+  background: transparent;
+  color: inherit;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.trip-delete-btn {
+  border: 1px solid rgba(255, 134, 134, 0.45);
+  background: rgba(255, 80, 80, 0.12);
+  color: #ffb7b7;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.trip-delete-btn:hover {
+  background: rgba(255, 80, 80, 0.2);
+  border-color: rgba(255, 134, 134, 0.75);
+}
+
+.trip-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  background: rgba(5, 10, 16, 0.72);
+  padding: 16px;
+}
+
+.trip-modal {
+  width: min(480px, 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  background: #101925;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.trip-form-title {
+  margin: 0;
+  font-weight: 700;
+}
+
+.trip-create-form input,
+.trip-create-form select {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #0d1520;
+  color: #ecf2ff;
+  border-radius: 9px;
+  padding: 8px;
+}
+
+.trip-form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.trip-form-actions button {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #26374a;
+  color: #f0f5ff;
+  cursor: pointer;
+}
+
+.trip-form-actions button:first-child {
+  background: linear-gradient(130deg, #ff9b4d, #f47735);
+}
+
+.trip-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 170, 95, 0.65);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.trip-create-plus {
+  display: block;
+  font-size: 32px;
+  line-height: 1;
+}
+
+.trip-create-text,
+.trip-name {
+  margin: 6px 0 0;
+  font-weight: 600;
+}
+
+.trip-destination {
+  margin: 4px 0 0;
+  color: #b4c7dd;
+  font-size: 13px;
+}
+
+.trip-saved-meta {
+  margin: 6px 0 0;
+  color: #ffd4b5;
+  font-size: 12px;
+}
+
+.planner-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.planner-back-btn {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #121b26;
+  color: #eef4ff;
+  border-radius: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.planner-current-trip {
+  margin: 0;
+  color: #b8c8dc;
+  font-size: 14px;
+}
+
+.planner-dashboard {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.planner-column {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.planner-card,
+.planner-subcard {
+  background: rgba(17, 25, 36, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.planner-title,
+.planner-subtitle {
+  margin: 0 0 10px;
+}
+
+.planner-label {
+  display: block;
+  margin-bottom: 6px;
+  color: #c3d3e8;
+  font-size: 13px;
+}
+
+.planner-select,
+.planner-arrival-city {
+  width: 100%;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #0d1520;
+  color: #ecf2ff;
+  border-radius: 9px;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.planner-arrival-city {
+  min-height: 40px;
+}
+
+.planner-button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: linear-gradient(130deg, #ff9b4d, #f47735);
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.planner-inline-error {
+  margin: 8px 0 0;
+  color: #ffb4b4;
+  font-size: 13px;
+}
+
+.planner-flight-cost,
+.planner-selected-hostel {
+  margin: 10px 0 0;
+  color: #d5e8ff;
+}
+
+.planner-places-list,
+.planner-hostel-list,
+.planner-transport-list {
+  display: grid;
+  gap: 10px;
+}
+
+.planner-place-row,
+.planner-hostel-row,
+.planner-transport-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.planner-place-button {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  color: #ecf2ff;
+  text-align: left;
+}
+
+.planner-place-button span {
+  color: #b6cbe4;
+}
+
+.planner-place-button.is-selected {
+  border-color: rgba(81, 213, 161, 0.6);
+  background: rgba(81, 213, 161, 0.12);
+}
+
+.planner-place-name,
+.planner-place-cost,
+.planner-hostel-name,
+.planner-hostel-price,
+.planner-transport-type,
+.planner-transport-price {
+  margin: 0;
+}
+
+.planner-hostel-button.is-selected {
+  background: #2fba88;
+}
+
+.planner-flight-options {
+  display: grid;
+  gap: 8px;
+}
+
+.planner-flight-card {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #eaf1ff;
+  padding: 10px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.planner-flight-card p,
+.planner-flight-card span {
+  margin: 0;
+}
+
+.planner-flight-card input[type="radio"] {
+  margin-top: 4px;
+  accent-color: #ff9b4d;
+}
+
+.planner-flight-card span {
+  color: #b7cadf;
+  font-size: 12px;
+}
+
+.planner-flight-card.is-selected {
+  border-color: rgba(255, 170, 95, 0.68);
+  background: rgba(255, 170, 95, 0.1);
+}
+
+.planner-total-card {
+  position: sticky;
+  top: 90px;
+}
+
+.planner-total-value {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.planner-summary-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.planner-summary-brand {
+  margin: 10px 0 0;
+  color: #ffcfad;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.planner-summary-message {
+  margin: 8px 0 0;
+  color: #bfe4c9;
+  font-size: 13px;
+}
+
+.planner-stepper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.planner-step-chip {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.02);
+  color: #d5e8ff;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.planner-step-chip.is-active {
+  border-color: rgba(255, 170, 95, 0.7);
+  background: rgba(255, 170, 95, 0.12);
+  color: #ffd7b7;
+}
+
+.planner-progress-card {
+  margin-bottom: 14px;
+}
+
+.planner-current-step {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.planner-guide-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.planner-guide-actions .planner-back-btn:disabled,
+.planner-guide-actions .planner-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 980px) {
+  .trip-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .planner-dashboard {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .trip-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.planner-days-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.planner-day-card {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.planner-day-title {
+  margin: 0 0 8px;
+  font-weight: 700;
+  color: #ffcfad;
+}
+
+.planner-day-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: #c3d3e8;
+}
+
+.planner-day-checkbox-row input {
+  accent-color: #ff9b4d;
+}
+
+.planner-day-note {
+  margin: 0 0 10px;
+  color: #b7cadf;
+  font-size: 13px;
+}
+
+.planner-day-places-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.planner-day-place-chip {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #eaf1ff;
+  padding: 7px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.planner-day-place-chip.is-selected {
+  border-color: rgba(81, 213, 161, 0.75);
+  background: rgba(81, 213, 161, 0.16);
+}
+
+.planner-day-total {
+  margin: 8px 0 0;
+  font-weight: 700;
+}
+
+/* Light theme overrides */
+.budget-page {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(63, 122, 224, 0.12), transparent 35%),
+    radial-gradient(circle at 100% 0%, rgba(239, 139, 98, 0.12), transparent 30%),
+    var(--bg);
+  color: var(--text);
+}
+
+.budget-kicker {
+  color: var(--secondary);
+}
+
+.budget-copy,
+.planner-current-trip,
+.trip-destination,
+.planner-selected-hostel,
+.planner-day-note {
+  color: var(--muted);
+}
+
+.trip-card,
+.planner-card,
+.planner-subcard,
+.trip-modal {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+  box-shadow: 0 10px 24px rgba(31, 42, 55, 0.06);
+}
+
+.trip-card:hover {
+  border-color: rgba(63, 122, 224, 0.45);
+}
+
+.planner-select,
+.planner-arrival-city,
+.trip-create-form input,
+.trip-create-form select,
+.trip-create-form input[type="date"] {
+  background: #ffffff;
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.planner-label,
+.trip-saved-meta,
+.planner-place-button span,
+.planner-flight-card span,
+.planner-transport-type {
+  color: var(--muted);
+}
+
+.planner-button,
+.trip-form-actions button:first-child {
+  background: var(--primary);
+}
+
+.planner-button:hover,
+.trip-form-actions button:first-child:hover {
+  background: #346aca;
+}
+
+.planner-back-btn,
+.trip-form-actions button,
+.planner-transport-card,
+.planner-place-row,
+.planner-hostel-row,
+.planner-flight-card,
+.planner-day-card {
+  background: var(--surface-soft);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.planner-place-button.is-selected,
+.planner-step-chip.is-active,
+.planner-flight-card.is-selected {
+  border-color: rgba(63, 122, 224, 0.55);
+  background: var(--primary-soft);
+  color: var(--text);
+}
+
+.planner-summary-brand,
+.planner-day-title {
+  color: var(--secondary);
+}
+
+.planner-inline-error {
+  color: #d45e4a;
+}

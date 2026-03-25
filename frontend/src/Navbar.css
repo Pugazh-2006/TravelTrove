@@ -1,0 +1,64 @@
+/* Navbar */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 58px;
+  padding: 0 48px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  color: var(--text);
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar h2 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.navbar ul {
+  list-style: none;
+  display: flex;
+  gap: 22px;
+}
+
+.navbar ul li {
+  font-size: 14px;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.navbar ul li::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: var(--primary);
+  transition: width 0.3s ease;
+}
+
+.navbar ul li:hover::after {
+  width: 100%;
+}
+
+.navbar ul li:hover {
+  color: var(--primary);
+}
+
+.navbar a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.nav-brand {
+  color: inherit;
+}
