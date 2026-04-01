@@ -10,25 +10,35 @@ function TripDashboard({ trips, onCreateTrip, onOpenTrip, onDeleteTrip }) {
   const [tripStartDate, setTripStartDate] = useState("");
   const [tripDays, setTripDays] = useState(4);
   const [destinationFocus, setDestinationFocus] = useState("international");
+  const [createError, setCreateError] = useState("");
   const destinationOptions =
     destinationFocus === "international" ? internationalDestinations : indiaDestinations;
 
-  const handleCreate = () => {
-    if (!tripName.trim() || !tripDestination || !tripStartDate || !tripDays) {
-      return;
-    }
-
-    onCreateTrip({
-      name: tripName.trim(),
-      destination: tripDestination,
-      startDate: tripStartDate,
-      days: tripDays,
-    });
+  const resetCreateForm = () => {
     setTripName("");
     setTripDestination("");
     setTripStartDate("");
     setTripDays(4);
+    setDestinationFocus("international");
+    setCreateError("");
     setShowCreateForm(false);
+  };
+
+  const handleCreate = () => {
+    if (!tripDestination || !tripStartDate || !tripDays) {
+      setCreateError("Choose a destination, start date, and number of days before creating the trip.");
+      return;
+    }
+
+    const generatedName = `${tripDestination} Trip`;
+
+    onCreateTrip({
+      name: tripName.trim() || generatedName,
+      destination: tripDestination,
+      startDate: tripStartDate,
+      days: tripDays,
+    });
+    resetCreateForm();
   };
 
   return (
@@ -81,13 +91,21 @@ function TripDashboard({ trips, onCreateTrip, onOpenTrip, onDeleteTrip }) {
               type="text"
               placeholder="Trip name"
               value={tripName}
-              onChange={(event) => setTripName(event.target.value)}
+              onChange={(event) => {
+                setTripName(event.target.value);
+                if (createError) {
+                  setCreateError("");
+                }
+              }}
             />
             <select
               value={destinationFocus}
               onChange={(event) => {
                 setDestinationFocus(event.target.value);
                 setTripDestination("");
+                if (createError) {
+                  setCreateError("");
+                }
               }}
             >
               <option value="international">International (Recommended)</option>
@@ -95,7 +113,12 @@ function TripDashboard({ trips, onCreateTrip, onOpenTrip, onDeleteTrip }) {
             </select>
             <select
               value={tripDestination}
-              onChange={(event) => setTripDestination(event.target.value)}
+              onChange={(event) => {
+                setTripDestination(event.target.value);
+                if (createError) {
+                  setCreateError("");
+                }
+              }}
             >
               <option value="">Choose destination</option>
               {destinationOptions.map((destination) => (
@@ -107,7 +130,12 @@ function TripDashboard({ trips, onCreateTrip, onOpenTrip, onDeleteTrip }) {
             <input
               type="date"
               value={tripStartDate}
-              onChange={(event) => setTripStartDate(event.target.value)}
+              onChange={(event) => {
+                setTripStartDate(event.target.value);
+                if (createError) {
+                  setCreateError("");
+                }
+              }}
             />
             <input
               type="number"
@@ -115,13 +143,23 @@ function TripDashboard({ trips, onCreateTrip, onOpenTrip, onDeleteTrip }) {
               max="14"
               placeholder="How many days?"
               value={tripDays}
-              onChange={(event) => setTripDays(Math.max(1, Math.min(14, Number(event.target.value) || 1)))}
+              onChange={(event) => {
+                if (event.target.value === "") {
+                  setTripDays("");
+                } else {
+                  setTripDays(Math.max(1, Math.min(14, Number(event.target.value) || 1)));
+                }
+                if (createError) {
+                  setCreateError("");
+                }
+              }}
             />
+            {createError && <p className="trip-form-error">{createError}</p>}
             <div className="trip-form-actions">
               <button type="button" onClick={handleCreate}>
                 Create Trip
               </button>
-              <button type="button" onClick={() => setShowCreateForm(false)}>
+              <button type="button" onClick={resetCreateForm}>
                 Cancel
               </button>
             </div>

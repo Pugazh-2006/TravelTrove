@@ -1,6 +1,9 @@
+import { useNavigate } from "react-router-dom";
 import "./Home.css"
 
 function Home() {
+  const navigate = useNavigate();
+
   return (
     <>
       {/* Hero Section */}
@@ -12,7 +15,9 @@ function Home() {
             TravelTrove is a backpacker-focused planner that builds
             realistic budgets first, so you can travel smart and spend less.
           </p>
-          <button className="cta-btn">Start Planning</button>
+          <button className="cta-btn" type="button" onClick={() => navigate("/planner")}>
+            Start Planning
+          </button>
         </div>
       </section>
 

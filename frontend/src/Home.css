@@ -372,7 +372,7 @@ body {
 
 .hero {
   background-image:
-    linear-gradient(rgba(247, 249, 252, 0.2), rgba(247, 249, 252, 0.2)),
+    linear-gradient(rgba(16, 23, 34, 0.48), rgba(16, 23, 34, 0.58)),
     url("/images/hero.jpg");
 }
 
@@ -382,9 +382,12 @@ body {
   border-color: #ffd7c5;
 }
 
-.hero-text h1,
+.hero-text h1 {
+  color: #ffffff;
+}
+
 .hero-text p {
-  color: var(--text);
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .cta-btn {
