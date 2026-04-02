@@ -128,6 +128,14 @@ function formatDuration(durationInMinutes) {
   return restMinutes ? `${hours}h ${restMinutes}m` : `${hours}h`;
 }
 
+function formatFlightStops(layovers) {
+  const count = Array.isArray(layovers) ? layovers.length : 0;
+  if (count === 0) {
+    return "Non-stop";
+  }
+  return count === 1 ? "1 stop" : `${count} stops`;
+}
+
 function toFlightLocationId(rawValue) {
   const value = String(rawValue || "").trim();
   if (!value) {
@@ -203,11 +211,15 @@ app.get("/api/search/flights", async (req, res) => {
     const mappedFlights = [...(response.best_flights || []), ...(response.other_flights || [])]
       .map((flight, index) => {
         const firstLeg = flight.flights?.[0];
+        const lastLeg = flight.flights?.[flight.flights.length - 1];
         const airline = firstLeg?.airline || "Flight";
         const duration = formatDuration(flight.total_duration);
         const departureTime = firstLeg?.departure_airport?.time || "";
-        const arrivalTime =
-          flight.flights?.[flight.flights.length - 1]?.arrival_airport?.time || "";
+        const arrivalTime = lastLeg?.arrival_airport?.time || "";
+        const stops = formatFlightStops(flight.layovers);
+        const bookingToken =
+          Array.isArray(flight.booking_token) ? flight.booking_token[0] : flight.booking_token || "";
+        const route = `${firstLeg?.departure_airport?.id || departureId} - ${lastLeg?.arrival_airport?.id || arrivalId}`;
 
         return {
           id: `${airline}-${index}`,
@@ -216,6 +228,10 @@ app.get("/api/search/flights", async (req, res) => {
           duration,
           departureTime,
           arrivalTime,
+          stops,
+          route,
+          bookingToken,
+          source: flight.departure_token ? "live" : "cache",
         };
       })
       .filter((flight) => flight.price > 0);
