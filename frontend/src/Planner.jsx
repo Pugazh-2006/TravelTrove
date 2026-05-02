@@ -394,7 +394,7 @@ function Planner({ initialTrip, user, onSavePlan }) {
     currentMission === "setup"
       ? "Set first destination and number of days."
       : currentMission === "flights"
-        ? "Choose Flight 1 first. Flight 2 unlocks only after Segment 1 day cards are complete."
+        ? <><span style={{ color: "#ef4444", fontWeight: "bold" }}>Note: </span>Choose Flight 1 first. Flight 2 unlocks only after Segment 1 day cards are complete.</>
         : currentMission === "itinerary-segment1"
           ? `Complete all ${tripDays} days with stay + food + local transport.`
           : currentMission === "itinerary-segment2"
@@ -993,39 +993,41 @@ function Planner({ initialTrip, user, onSavePlan }) {
           </div>
         </div>
       )}
-      <div className="planner-subcard planner-progress-card">
-        <p className="planner-label">Trip Journey</p>
-        <p className="planner-current-step">{missionTitle}</p>
-        <p className="planner-selected-hostel">{missionHint}</p>
-        <div className="planner-transport-list">
-          <div className="planner-transport-card">
-            <p className="planner-transport-type">Segment 1 ({destination || "Not started"})</p>
-            <p className="planner-transport-price">
-              {segment1Complete ? "Complete" : `${segment1CompletedDays}/${tripDays} days complete`}
-            </p>
-          </div>
-          <div className="planner-transport-card">
-            <p className="planner-transport-type">Segment 2 ({onwardDestination || "Locked"})</p>
-            <p className="planner-transport-price">
-              {!tripType
-                ? "Decision pending"
-                : tripType !== "continue"
-                  ? "Return selected"
-                : !showSecondFlight
-                  ? segment1Complete
-                    ? "Ready to add Flight 2"
-                    : "Locked until Segment 1 complete"
-                  : segment2Complete
-                    ? "Complete"
-                    : `${segment2CompletedDays}/${secondSegmentDays} days complete`}
-            </p>
-          </div>
-        </div>
-        <p className="planner-selected-hostel">Current estimate: {formatInr(totalCost)}</p>
-        {guideMessage && <p className="planner-inline-error">{guideMessage}</p>}
-      </div>
       <div className="planner-dashboard">
         <div className="planner-column">
+          {/* Progress Card Moved to Left Column */}
+          <div className="planner-subcard planner-progress-card">
+            <p className="planner-label">Trip Journey</p>
+            <p className="planner-current-step">{missionTitle}</p>
+            <p className="planner-selected-hostel">{missionHint}</p>
+            <div className="planner-transport-list">
+              <div className="planner-transport-card">
+                <p className="planner-transport-type">Segment 1 ({destination || "Not started"})</p>
+                <p className="planner-transport-price">
+                  {segment1Complete ? "Complete" : `${segment1CompletedDays}/${tripDays} days complete`}
+                </p>
+              </div>
+              <div className="planner-transport-card">
+                <p className="planner-transport-type">Segment 2 ({onwardDestination || "Locked"})</p>
+                <p className="planner-transport-price">
+                  {!tripType
+                    ? "Decision pending"
+                    : tripType !== "continue"
+                      ? "Return selected"
+                    : !showSecondFlight
+                      ? segment1Complete
+                        ? "Ready to add Flight 2"
+                        : "Locked until Segment 1 complete"
+                      : segment2Complete
+                        ? "Complete"
+                        : `${segment2CompletedDays}/${secondSegmentDays} days complete`}
+                </p>
+              </div>
+            </div>
+            <p className="planner-selected-hostel">Current estimate: {formatInr(totalCost)}</p>
+            {guideMessage && <p className="planner-inline-error">{guideMessage}</p>}
+          </div>
+
           {showSetupSection && (
           <div className="planner-card">
             <h2 className="planner-title">Trip Setup</h2>
@@ -1075,7 +1077,8 @@ function Planner({ initialTrip, user, onSavePlan }) {
             )}
           </div>
           )}
-
+        </div>
+        <div className="planner-column">
           {showFlightsSection && (
           <div className="planner-subcard">
             <h3 className="planner-subtitle">Flight 1</h3>
@@ -1299,6 +1302,8 @@ function Planner({ initialTrip, user, onSavePlan }) {
             )}
           </div>
           )}
+        </div>
+        <div className="planner-column">
 
           {showContinueChoiceSection && (
             <div className="planner-subcard">

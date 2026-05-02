@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import "./Home.css"
 
 function Home() {
@@ -12,7 +13,9 @@ function Home() {
             TravelTrove is a backpacker-focused planner that builds
             realistic budgets first, so you can travel smart and spend less.
           </p>
-          <button className="cta-btn">Start Planning</button>
+          <Link to="/login">
+            <button className="cta-btn">Login</button>
+          </Link>
         </div>
       </section>
 
@@ -59,6 +62,9 @@ function Home() {
       <footer className="footer">
         <div className="footer-content">
           <h3>TravelTrove</h3>
+          <p className="footer-quote" style={{ fontStyle: "italic", color: "var(--primary)", fontWeight: "600", margin: "8px 0 16px", fontSize: "15px" }}>
+            "Take only memories, leave only footprints. Adventure awaits."
+          </p>
           <p>
             A backpacker-focused travel planning platform for
             budget-friendly and transparent trip planning.

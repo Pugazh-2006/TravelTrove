@@ -16,7 +16,8 @@
 }
 
 .budget-header {
-  margin-bottom: 18px;
+  margin-bottom: 32px;
+  text-align: center;
 }
 
 .budget-kicker {
@@ -39,8 +40,9 @@
 
 .trip-row {
   display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  grid-template-columns: repeat(auto-fit, 260px);
+  justify-content: center;
 }
 
 .trip-card {
@@ -58,8 +60,8 @@
 
 .trip-create-form {
   display: grid;
-  gap: 8px;
-  padding: 12px;
+  gap: 16px;
+  padding: 32px;
   place-content: initial;
   text-align: left;
 }
@@ -108,43 +110,71 @@
 }
 
 .trip-modal {
-  width: min(480px, 100%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 14px;
-  background: #101925;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  width: min(560px, 100%);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(16px);
 }
 
 .trip-form-title {
-  margin: 0;
-  font-weight: 700;
+  margin: 0 0 12px;
+  font-weight: 800;
+  font-size: 26px;
+  color: var(--text);
 }
 
 .trip-create-form input,
 .trip-create-form select {
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: #0d1520;
-  color: #ecf2ff;
-  border-radius: 9px;
-  padding: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-soft);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.trip-create-form input:focus,
+.trip-create-form select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
 }
 
 .trip-form-actions {
   display: flex;
-  gap: 8px;
+  gap: 12px;
+  margin-top: 8px;
 }
 
 .trip-form-actions button {
   border: none;
-  border-radius: 8px;
-  padding: 8px 10px;
-  background: #26374a;
-  color: #f0f5ff;
+  border-radius: 12px;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  background: var(--surface-soft);
+  color: var(--text);
   cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+}
+
+.trip-form-actions button:hover {
+  background: var(--border);
 }
 
 .trip-form-actions button:first-child {
-  background: linear-gradient(130deg, #ff9b4d, #f47735);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #fff;
+}
+
+.trip-form-actions button:first-child:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
 }
 
 .trip-card:hover {
@@ -175,6 +205,45 @@
   margin: 6px 0 0;
   color: #ffd4b5;
   font-size: 12px;
+}
+
+.trip-item-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px;
+  text-align: left;
+}
+
+.trip-open-btn {
+  border: none;
+  background: transparent;
+  color: inherit;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  padding-right: 32px;
+}
+
+.trip-delete-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.trip-delete-btn:hover {
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
 }
 
 .planner-topbar {
@@ -438,19 +507,13 @@
 }
 
 @media (max-width: 980px) {
-  .trip-row {
-    grid-template-columns: 1fr 1fr;
-  }
-
   .planner-dashboard {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 620px) {
-  .trip-row {
-    grid-template-columns: 1fr;
-  }
+  /* other responsive overrides if needed */
 }
 
 .planner-days-list {
@@ -518,94 +581,4 @@
   font-weight: 700;
 }
 
-/* Light theme overrides */
-.budget-page {
-  background:
-    radial-gradient(circle at 0% 0%, rgba(63, 122, 224, 0.12), transparent 35%),
-    radial-gradient(circle at 100% 0%, rgba(239, 139, 98, 0.12), transparent 30%),
-    var(--bg);
-  color: var(--text);
-}
 
-.budget-kicker {
-  color: var(--secondary);
-}
-
-.budget-copy,
-.planner-current-trip,
-.trip-destination,
-.planner-selected-hostel,
-.planner-day-note {
-  color: var(--muted);
-}
-
-.trip-card,
-.planner-card,
-.planner-subcard,
-.trip-modal {
-  background: var(--surface);
-  border-color: var(--border);
-  color: var(--text);
-  box-shadow: 0 10px 24px rgba(31, 42, 55, 0.06);
-}
-
-.trip-card:hover {
-  border-color: rgba(63, 122, 224, 0.45);
-}
-
-.planner-select,
-.planner-arrival-city,
-.trip-create-form input,
-.trip-create-form select,
-.trip-create-form input[type="date"] {
-  background: #ffffff;
-  border-color: var(--border);
-  color: var(--text);
-}
-
-.planner-label,
-.trip-saved-meta,
-.planner-place-button span,
-.planner-flight-card span,
-.planner-transport-type {
-  color: var(--muted);
-}
-
-.planner-button,
-.trip-form-actions button:first-child {
-  background: var(--primary);
-}
-
-.planner-button:hover,
-.trip-form-actions button:first-child:hover {
-  background: #346aca;
-}
-
-.planner-back-btn,
-.trip-form-actions button,
-.planner-transport-card,
-.planner-place-row,
-.planner-hostel-row,
-.planner-flight-card,
-.planner-day-card {
-  background: var(--surface-soft);
-  border-color: var(--border);
-  color: var(--text);
-}
-
-.planner-place-button.is-selected,
-.planner-step-chip.is-active,
-.planner-flight-card.is-selected {
-  border-color: rgba(63, 122, 224, 0.55);
-  background: var(--primary-soft);
-  color: var(--text);
-}
-
-.planner-summary-brand,
-.planner-day-title {
-  color: var(--secondary);
-}
-
-.planner-inline-error {
-  color: #d45e4a;
-}

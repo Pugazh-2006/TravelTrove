@@ -102,7 +102,7 @@ export default function Blog({ user }) {
   const [draftStory, setDraftStory] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
-  const [sortBy, setSortBy] = useState("latest");
+  const [sortBy, setSortBy] = useState("popular");
   const [selectedPost, setSelectedPost] = useState(null);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [postsError, setPostsError] = useState("");
@@ -404,6 +404,19 @@ export default function Blog({ user }) {
       )}
 
       <section className="blog-layout">
+        <aside className="blog-sidebar-left">
+          <section className="panel">
+            <h3>Trending</h3>
+            {trendingPosts.map((post) => (
+              <button type="button" className="trend-item" key={post.id} onClick={() => openPost(post)}>
+                <p className="trend-title">{post.title}</p>
+                <span>{post.likes + post.comments} interactions</span>
+                <span className="trend-meta">{post.location} | {post.readTime}</span>
+              </button>
+            ))}
+          </section>
+        </aside>
+
         <div className="post-grid">
           {loadingPosts && <p className="empty-state">Loading community stories...</p>}
           {postsError && <p className="empty-state">{postsError}</p>}
@@ -455,18 +468,7 @@ export default function Blog({ user }) {
           )}
         </div>
 
-        <aside className="blog-sidebar">
-          <section className="panel">
-            <h3>Trending</h3>
-            {trendingPosts.map((post) => (
-              <button type="button" className="trend-item" key={post.id} onClick={() => openPost(post)}>
-                <p className="trend-title">{post.title}</p>
-                <span>{post.likes + post.comments} interactions</span>
-                <span className="trend-meta">{post.location} | {post.readTime}</span>
-              </button>
-            ))}
-          </section>
-
+        <aside className="blog-sidebar-right">
           <section className="panel">
             <h3>Writing Toolkit</h3>
             <p>Use this checklist before publishing your story.</p>

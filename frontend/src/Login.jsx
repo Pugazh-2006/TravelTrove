@@ -7,6 +7,7 @@ import {
   sendPasswordResetEmail,
   updateProfile,
 } from "firebase/auth";
+import "./Login.css";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -27,12 +28,10 @@ const Login = () => {
       setError("Password must be exactly 8 characters");
       return false;
     }
-
     if (!specialCharRegex.test(password)) {
       setError("Password must include at least one special character");
       return false;
     }
-
     return true;
   };
 
@@ -95,162 +94,86 @@ const Login = () => {
   };
 
   return (
-    <div style={styles.page}>
-      <div style={styles.overlay}>
-        <div style={styles.box}>
-          <h1 style={styles.title}>TravelTrove</h1>
-          <p style={styles.subtitle}>Explore - Experience - Enjoy</p>
-          <h2 style={styles.formTitle}>{formTitle}</h2>
+    <div className="login-page">
+      <div className="login-container">
+        <h1 className="title">TravelTrove</h1>
+        <p className="subtitle">Explore - Experience - Enjoy</p>
+        <h2 className="form-title">{formTitle}</h2>
 
-          <form onSubmit={handleSubmit}>
-            {!isLoginMode && (
-              <>
-                <input
-                  type="text"
-                  placeholder="Full Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  style={styles.input}
-                />
-                <input
-                  type="number"
-                  placeholder="Age"
-                  value={age}
-                  min={10}
-                  max={100}
-                  onChange={(e) => setAge(e.target.value)}
-                  required
-                  style={styles.input}
-                />
-              </>
-            )}
-
-            <input
-              type="email"
-              placeholder="Email Address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              style={styles.input}
-            />
-
-            <input
-              type="password"
-              placeholder="Password (8 chars)"
-              maxLength={8}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              style={styles.input}
-            />
-
-            <button type="submit" style={styles.button}>
-              {formButtonText}
-            </button>
-          </form>
-
-          {isLoginMode && (
-            <p style={styles.forgot} onClick={handleForgotPassword}>
-              Forgot Password?
-            </p>
+        <form onSubmit={handleSubmit}>
+          {!isLoginMode && (
+            <>
+              <input
+                type="text"
+                placeholder="Full Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="login-input"
+              />
+              <input
+                type="number"
+                placeholder="Age"
+                value={age}
+                min={10}
+                max={100}
+                onChange={(e) => setAge(e.target.value)}
+                required
+                className="login-input"
+              />
+            </>
           )}
 
-          <p
-            style={styles.toggleMode}
-            onClick={() => {
-              setIsLoginMode((prev) => !prev);
-              setName("");
-              setAge("");
-              setError("");
-              setSuccess("");
-            }}
-          >
-            {isLoginMode
-              ? "New user? Create account"
-              : "Already have an account? Login"}
-          </p>
+          <input
+            type="email"
+            placeholder="Email Address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="login-input"
+          />
 
-          {error && <p style={styles.error}>{error}</p>}
-          {success && <p style={styles.success}>{success}</p>}
-        </div>
+          <input
+            type="password"
+            placeholder="Password (8 chars)"
+            maxLength={8}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="login-input"
+          />
+
+          <button type="submit" className="login-btn">
+            {formButtonText}
+          </button>
+        </form>
+
+        {isLoginMode && (
+          <p className="forgot" onClick={handleForgotPassword}>
+            Forgot Password?
+          </p>
+        )}
+
+        <p
+          className="toggle-mode"
+          onClick={() => {
+            setIsLoginMode((prev) => !prev);
+            setName("");
+            setAge("");
+            setError("");
+            setSuccess("");
+          }}
+        >
+          {isLoginMode
+            ? "New user? Create account"
+            : "Already have an account? Login"}
+        </p>
+
+        {error && <p className="error-msg">{error}</p>}
+        {success && <p className="success-msg">{success}</p>}
       </div>
     </div>
   );
-};
-
-const styles = {
-  page: {
-    height: "100vh",
-    backgroundImage:
-      "url('https://images.unsplash.com/photo-1501785888041-af3ef285b470')",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-  },
-  overlay: {
-    height: "100%",
-    backgroundColor: "rgba(0,0,0,0.6)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  box: {
-    background: "rgba(0,0,0,0.85)",
-    padding: "40px",
-    width: "380px",
-    borderRadius: "15px",
-    textAlign: "center",
-  },
-  title: {
-    color: "#ff8c00",
-    fontSize: "32px",
-    fontWeight: "bold",
-  },
-  subtitle: {
-    color: "#ccc",
-    marginBottom: "10px",
-  },
-  formTitle: {
-    color: "#fff",
-    marginBottom: "10px",
-  },
-  input: {
-    width: "100%",
-    padding: "12px",
-    margin: "10px 0",
-    borderRadius: "8px",
-    border: "none",
-  },
-  button: {
-    width: "100%",
-    padding: "12px",
-    marginTop: "10px",
-    backgroundColor: "#ff8c00",
-    color: "white",
-    border: "none",
-    borderRadius: "8px",
-    fontWeight: "bold",
-    cursor: "pointer",
-  },
-  forgot: {
-    marginTop: "15px",
-    color: "#ff8c00",
-    cursor: "pointer",
-  },
-  toggleMode: {
-    marginTop: "12px",
-    color: "#f2b066",
-    cursor: "pointer",
-    textDecoration: "underline",
-  },
-  error: {
-    marginTop: "10px",
-    color: "red",
-  },
-  success: {
-    marginTop: "10px",
-    color: "#3ddc84",
-  },
 };
 
 export default Login;

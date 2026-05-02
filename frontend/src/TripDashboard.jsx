@@ -8,7 +8,7 @@ function TripDashboard({ trips, onCreateTrip, onOpenTrip, onDeleteTrip }) {
   const [tripName, setTripName] = useState("");
   const [tripDestination, setTripDestination] = useState("");
   const [tripStartDate, setTripStartDate] = useState("");
-  const [tripDays, setTripDays] = useState(4);
+  const [tripDays, setTripDays] = useState("");
   const [destinationFocus, setDestinationFocus] = useState("international");
   const destinationOptions =
     destinationFocus === "international" ? internationalDestinations : indiaDestinations;
@@ -113,9 +113,12 @@ function TripDashboard({ trips, onCreateTrip, onOpenTrip, onDeleteTrip }) {
               type="number"
               min="1"
               max="14"
-              placeholder="How many days?"
+              placeholder="Number of days (e.g. 4)"
               value={tripDays}
-              onChange={(event) => setTripDays(Math.max(1, Math.min(14, Number(event.target.value) || 1)))}
+              onChange={(event) => {
+                const val = event.target.value;
+                setTripDays(val === "" ? "" : Math.max(1, Math.min(14, Number(val))));
+              }}
             />
             <div className="trip-form-actions">
               <button type="button" onClick={handleCreate}>
