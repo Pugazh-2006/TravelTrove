@@ -262,6 +262,65 @@ app.get("/api/search/places", async (req, res) => {
   }
 });
 
+app.get("/api/search/hotels", async (req, res) => {
+  const destination = String(req.query.destination || "").trim();
+  const checkInDate = String(req.query.checkInDate || req.query.check_in_date || "").trim();
+  const checkOutDate = String(req.query.checkOutDate || req.query.check_out_date || "").trim();
+  const adults = Math.max(1, Math.min(9, Number(req.query.adults) || 1));
+
+  if (!destination || !checkInDate || !checkOutDate) {
+    res.status(400).json({ message: "'destination', 'checkInDate', and 'checkOutDate' are required." });
+    return;
+  }
+
+  try {
+    const response = await querySerpApi({
+      engine: "google_hotels",
+      q: `budget hostels in ${destination}`,
+      check_in_date: checkInDate,
+      check_out_date: checkOutDate,
+      adults,
+      currency: "INR",
+      hl: "en",
+      gl: "in",
+      sort_by: 3,
+    });
+
+    const properties = [...(response.properties || []), ...(response.ads || [])];
+    const hotels = properties
+      .map((hotel, index) => {
+        const rate = hotel.rate_per_night || {};
+        const totalRate = hotel.total_rate || {};
+        const price =
+          parsePrice(rate.extracted_lowest) ||
+          parsePrice(hotel.extracted_price) ||
+          parsePrice(rate.lowest) ||
+          parsePrice(totalRate.extracted_lowest) ||
+          parsePrice(totalRate.lowest);
+
+        return {
+          id: hotel.property_token || hotel.name || `${destination}-hotel-${index}`,
+          name: hotel.name || "Stay",
+          price,
+          totalPrice: parsePrice(totalRate.extracted_lowest) || parsePrice(totalRate.lowest) || 0,
+          rating: Number(hotel.overall_rating) || null,
+          reviews: Number(hotel.reviews) || 0,
+          amenities: Array.isArray(hotel.amenities) ? hotel.amenities.slice(0, 4) : [],
+          image: hotel.thumbnail || hotel.images?.[0]?.thumbnail || "",
+          link: hotel.link || hotel.serpapi_property_details_link || "",
+          source: hotel.source || hotel.prices?.[0]?.source || "",
+        };
+      })
+      .filter((hotel) => hotel.name && hotel.price > 0)
+      .slice(0, 10);
+
+    res.status(200).json({ hotels });
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ message: error.message || "Failed to fetch hotels." });
+  }
+});
+
 app.get("/api/blog-posts", async (req, res) => {
   try {
     const posts = await readBlogPosts();
@@ -339,4 +398,5 @@ app.delete("/api/blog-posts/:id", async (req, res) => {
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
+  console.log(`SerpAPI key ${serpApiKey ? "loaded" : "missing"}`);
 });

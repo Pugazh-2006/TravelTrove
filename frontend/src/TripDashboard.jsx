@@ -46,8 +46,27 @@ function TripDashboard({ trips, onCreateTrip, onOpenTrip, onDeleteTrip }) {
         )}
 
         {trips.map((trip) => (
-          <div key={trip.id} className="trip-card trip-item-card">
-            <button type="button" className="trip-open-btn" onClick={() => onOpenTrip(trip)}>
+          <div
+            key={trip.id}
+            className="trip-card trip-item-card"
+            role="button"
+            tabIndex={0}
+            onClick={() => onOpenTrip(trip)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onOpenTrip(trip);
+              }
+            }}
+          >
+            <button
+              type="button"
+              className="trip-open-btn"
+              onClick={(event) => {
+                event.stopPropagation();
+                onOpenTrip(trip);
+              }}
+            >
               <p className="trip-name">{trip.name}</p>
               <p className="trip-destination">{trip.destination}</p>
               {trip.lastSavedPlan && (

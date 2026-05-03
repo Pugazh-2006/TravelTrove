@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Planner from "./Planner.jsx";
 import TripDashboard from "./TripDashboard.jsx";
 import "./BudgetPlanner.css";
@@ -18,6 +18,7 @@ function BudgetPlanner({ user }) {
   });
   const [plannerOpen, setPlannerOpen] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState(null);
+  const selectedTripId = selectedTrip?.id;
 
   const saveTrips = (nextTrips) => {
     setTrips(nextTrips);
@@ -75,6 +76,33 @@ function BudgetPlanner({ user }) {
     setSelectedTrip(updatedTrip);
   };
 
+  const handleDraftChanged = useCallback(
+    (draftPlan) => {
+      if (!selectedTripId || !draftPlan) {
+        return;
+      }
+
+      setTrips((currentTrips) => {
+        const nextTrips = currentTrips.map((trip) =>
+          trip.id === selectedTripId
+            ? {
+                ...trip,
+                draftPlan,
+                draftSavedAt: new Date().toISOString(),
+              }
+            : trip
+        );
+        localStorage.setItem(storageKey, JSON.stringify(nextTrips));
+        const updatedTrip = nextTrips.find((trip) => trip.id === selectedTripId);
+        if (updatedTrip) {
+          setSelectedTrip(updatedTrip);
+        }
+        return nextTrips;
+      });
+    },
+    [selectedTripId, storageKey]
+  );
+
   return (
     <main className="budget-page">
       <section className="budget-header">
@@ -109,6 +137,7 @@ function BudgetPlanner({ user }) {
             initialTrip={selectedTrip}
             user={user}
             onSavePlan={handlePlanSaved}
+            onDraftChange={handleDraftChanged}
           />
         </section>
       )}

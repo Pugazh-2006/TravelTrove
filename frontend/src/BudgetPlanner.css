@@ -11,7 +11,7 @@
 .budget-header,
 .planner-wrapper,
 .trip-page {
-  max-width: 1160px;
+  max-width: 1450px;
   margin: 0 auto;
 }
 
@@ -251,7 +251,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .planner-back-btn {
@@ -271,14 +271,41 @@
 
 .planner-dashboard {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
 }
 
 .planner-column {
   display: grid;
   gap: 14px;
   align-content: start;
+  min-width: 0;
+}
+
+.planner-column:first-child {
+  grid-column: 1;
+  position: sticky;
+  top: 110px;
+}
+
+.planner-column:nth-child(n + 2) {
+  grid-column: 2;
+}
+
+.planner-column:nth-child(4) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+
+.planner-column:nth-child(4) > .planner-subcard {
+  min-width: 0;
+}
+
+.planner-column:nth-child(4) > .planner-subcard:nth-of-type(3),
+.planner-column:nth-child(4) > .planner-transport-list,
+.planner-column:nth-child(4) > .planner-total-card {
+  grid-column: 1 / -1;
 }
 
 .planner-card,
@@ -325,6 +352,7 @@
   color: #ffffff;
   font-weight: 700;
   cursor: pointer;
+  margin: 4px 6px 4px 0;
 }
 
 .planner-inline-error {
@@ -389,6 +417,20 @@
   background: #2fba88;
 }
 
+.planner-stay-link {
+  display: inline-flex;
+  margin-top: 6px;
+  color: #9fd0ff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.planner-stay-link:hover {
+  color: #c7e3ff;
+  text-decoration: underline;
+}
+
 .planner-flight-options {
   display: grid;
   gap: 8px;
@@ -446,6 +488,17 @@
   flex-wrap: wrap;
 }
 
+.planner-inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.planner-inline-actions .planner-button {
+  margin: 0;
+}
+
 .planner-summary-brand {
   margin: 10px 0 0;
   color: #ffcfad;
@@ -484,7 +537,7 @@
 }
 
 .planner-progress-card {
-  margin-bottom: 14px;
+  margin-bottom: 0;
 }
 
 .planner-current-step {
@@ -508,6 +561,23 @@
 
 @media (max-width: 980px) {
   .planner-dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .planner-column:first-child,
+  .planner-column:nth-child(n + 2),
+  .planner-column:nth-child(4),
+  .planner-column:nth-child(4) > .planner-subcard:nth-of-type(3),
+  .planner-column:nth-child(4) > .planner-transport-list,
+  .planner-column:nth-child(4) > .planner-total-card {
+    grid-column: auto;
+  }
+
+  .planner-column:first-child {
+    position: static;
+  }
+
+  .planner-column:nth-child(4) {
     grid-template-columns: 1fr;
   }
 }

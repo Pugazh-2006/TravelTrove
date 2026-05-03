@@ -144,6 +144,14 @@ function sanitizeBudgetValue(value) {
   return Math.round(asNumber);
 }
 
+function sanitizeBudgetInput(value) {
+  if (value === "") {
+    return "";
+  }
+
+  return sanitizeBudgetValue(value);
+}
+
 function escapeHtml(value) {
   return String(value || "")
     .replaceAll("&", "&amp;")
@@ -173,61 +181,88 @@ function formatLocalCurrency(inrAmount, destination) {
   return `${currency} ${localAmount.toFixed(currency === "IDR" ? 0 : 2)}`;
 }
 
-function Planner({ initialTrip, user, onSavePlan }) {
-  const initialDestination = initialTrip?.destination || initialTrip?.name?.replace(" Trip", "") || "";
+function Planner({ initialTrip, user, onSavePlan, onDraftChange }) {
+  const initialDraft = initialTrip?.draftPlan || {};
+  const initialDestination =
+    initialDraft.destination || initialTrip?.destination || initialTrip?.name?.replace(" Trip", "") || "";
   const tripName = initialTrip?.name || "My Trip";
   const initialTripDays = Math.max(
     1,
-    Math.min(MAX_TRIP_DAYS, Number(initialTrip?.days) || DEFAULT_TRIP_DAYS)
+    Math.min(MAX_TRIP_DAYS, Number(initialDraft.tripDays || initialTrip?.days) || DEFAULT_TRIP_DAYS)
   );
-  const initialFilter = indiaDestinations.includes(initialDestination) ? "india" : "international";
+  const initialFilter =
+    initialDraft.destinationFilter ||
+    (indiaDestinations.includes(initialDestination) ? "india" : "international");
   const [destinationFilter, setDestinationFilter] = useState(initialFilter);
   const [destination, setDestination] = useState(initialDestination);
-  const [selectedHostel, setSelectedHostel] = useState(null);
-  const [departureCity, setDepartureCity] = useState("");
-  const [tripType, setTripType] = useState("");
-  const [passengers, setPassengers] = useState(1);
-  const [flightResults, setFlightResults] = useState([]);
-  const [selectedFlight, setSelectedFlight] = useState(null);
-  const [onwardDestination, setOnwardDestination] = useState("");
-  const [onwardDate, setOnwardDate] = useState("");
-  const [onwardFlightResults, setOnwardFlightResults] = useState([]);
-  const [selectedOnwardFlight, setSelectedOnwardFlight] = useState(null);
-  const [onwardFlightSort, setOnwardFlightSort] = useState("low");
+  const [selectedHostel, setSelectedHostel] = useState(initialDraft.selectedHostel || null);
+  const [departureCity, setDepartureCity] = useState(initialDraft.departureCity || "");
+  const [tripType, setTripType] = useState(initialDraft.tripType || "");
+  const [passengers, setPassengers] = useState(initialDraft.passengers || 1);
+  const [flightResults, setFlightResults] = useState(initialDraft.flightResults || []);
+  const [selectedFlight, setSelectedFlight] = useState(initialDraft.selectedFlight || null);
+  const [flightConfirmed, setFlightConfirmed] = useState(initialDraft.flightConfirmed || false);
+  const [onwardDestination, setOnwardDestination] = useState(initialDraft.onwardDestination || "");
+  const [onwardDate, setOnwardDate] = useState(initialDraft.onwardDate || "");
+  const [onwardFlightResults, setOnwardFlightResults] = useState(initialDraft.onwardFlightResults || []);
+  const [selectedOnwardFlight, setSelectedOnwardFlight] = useState(initialDraft.selectedOnwardFlight || null);
+  const [onwardFlightConfirmed, setOnwardFlightConfirmed] = useState(initialDraft.onwardFlightConfirmed || false);
+  const [onwardFlightSort, setOnwardFlightSort] = useState(initialDraft.onwardFlightSort || "low");
   const [showSecondFlight, setShowSecondFlight] = useState(false);
-  const [flightSort, setFlightSort] = useState("low");
-  const [selectedPlaces, setSelectedPlaces] = useState([]);
-  const [placesResults, setPlacesResults] = useState([]);
+  const [flightSort, setFlightSort] = useState(initialDraft.flightSort || "low");
+  const [selectedPlaces, setSelectedPlaces] = useState(initialDraft.selectedPlaces || []);
+  const [placesResults, setPlacesResults] = useState(initialDraft.placesResults || []);
+  const [hotelResults, setHotelResults] = useState(initialDraft.hotelResults || []);
+  const [secondHotelResults, setSecondHotelResults] = useState(initialDraft.secondHotelResults || []);
   const [tripDays, setTripDays] = useState(initialTripDays);
-  const [dailyPlans, setDailyPlans] = useState(() => resizeDayPlans([], initialTripDays));
-  const [secondSegmentDays, setSecondSegmentDays] = useState(3);
-  const [secondDailyPlans, setSecondDailyPlans] = useState(() => resizeDayPlans([], 3));
-  const [secondSelectedHostel, setSecondSelectedHostel] = useState(null);
-  const [segment1DailyTarget, setSegment1DailyTarget] = useState(2500);
-  const [segment1MaxBudget, setSegment1MaxBudget] = useState(12000);
-  const [segment2DailyTarget, setSegment2DailyTarget] = useState(2500);
-  const [segment2MaxBudget, setSegment2MaxBudget] = useState(10000);
-  const [includeContingency, setIncludeContingency] = useState(true);
-  const [contingencyPercent, setContingencyPercent] = useState(10);
+  const [dailyPlans, setDailyPlans] = useState(() => resizeDayPlans(initialDraft.dailyPlans || [], initialTripDays));
+  const [secondSegmentDays, setSecondSegmentDays] = useState(initialDraft.secondSegmentDays || 3);
+  const [secondDailyPlans, setSecondDailyPlans] = useState(() =>
+    resizeDayPlans(initialDraft.secondDailyPlans || [], initialDraft.secondSegmentDays || 3)
+  );
+  const [secondSelectedHostel, setSecondSelectedHostel] = useState(initialDraft.secondSelectedHostel || null);
+  const [segment1DailyTarget, setSegment1DailyTarget] = useState(initialDraft.segment1DailyTarget || 2500);
+  const [segment1MaxBudget, setSegment1MaxBudget] = useState(initialDraft.segment1MaxBudget || 12000);
+  const [segment2DailyTarget, setSegment2DailyTarget] = useState(initialDraft.segment2DailyTarget || 2500);
+  const [segment2MaxBudget, setSegment2MaxBudget] = useState(initialDraft.segment2MaxBudget || 10000);
+  const [includeContingency, setIncludeContingency] = useState(initialDraft.includeContingency ?? true);
+  const [contingencyPercent, setContingencyPercent] = useState(initialDraft.contingencyPercent || 10);
   const [flightLoading, setFlightLoading] = useState(false);
   const [onwardFlightLoading, setOnwardFlightLoading] = useState(false);
   const [placesLoading, setPlacesLoading] = useState(false);
+  const [hotelsLoading, setHotelsLoading] = useState(false);
+  const [secondHotelsLoading, setSecondHotelsLoading] = useState(false);
   const [flightError, setFlightError] = useState("");
   const [onwardFlightError, setOnwardFlightError] = useState("");
   const [placesError, setPlacesError] = useState("");
-  const [outboundDate, setOutboundDate] = useState(initialTrip?.startDate || "");
+  const [hotelsError, setHotelsError] = useState("");
+  const [secondHotelsError, setSecondHotelsError] = useState("");
+  const [outboundDate, setOutboundDate] = useState(initialDraft.outboundDate || initialTrip?.startDate || "");
   const [summaryMessage, setSummaryMessage] = useState("");
-  const [guideMessage, setGuideMessage] = useState("");
+  const [guideMessage] = useState("");
   const flightCacheRef = useRef(new Map());
   const placesCacheRef = useRef(new Map());
+  const hotelsCacheRef = useRef(new Map());
   const planStorageKey = useMemo(() => `traveltrove_saved_plans_${user?.uid || "guest"}`, [user?.uid]);
 
   const sortedTransportOptions = [...transportOptions].sort((a, b) => a.price - b.price);
   const destinations = destinationFilter === "international" ? internationalDestinations : indiaDestinations;
-  const topPlaces = placesResults.length > 0 ? placesResults : topPlacesData[destination] || [];
-  const hostels = hostelData[destination] || [];
-  const secondSegmentPlaces = topPlacesData[onwardDestination] || [];
-  const secondSegmentHostels = hostelData[onwardDestination] || [];
+  const topPlaces = useMemo(
+    () => (placesResults.length > 0 ? placesResults : topPlacesData[destination] || []),
+    [destination, placesResults]
+  );
+  const hostels = useMemo(
+    () => (hotelResults.length > 0 ? hotelResults : hostelData[destination] || []),
+    [destination, hotelResults]
+  );
+  const secondSegmentPlaces = useMemo(
+    () => topPlacesData[onwardDestination] || [],
+    [onwardDestination]
+  );
+  const secondSegmentHostels = useMemo(
+    () => (secondHotelResults.length > 0 ? secondHotelResults : hostelData[onwardDestination] || []),
+    [onwardDestination, secondHotelResults]
+  );
   const departureOptions = cities.filter((city) => city !== destination);
   const onwardDestinationOptions = internationalDestinations.filter((city) => city !== destination);
   const selectedPlacesCost = selectedPlaces.reduce((sum, place) => sum + place.charge, 0);
@@ -323,7 +358,9 @@ function Planner({ initialTrip, user, onSavePlan }) {
   const secondItineraryTotal = resolvedSecondDailyPlans.reduce((sum, dayPlan) => sum + dayPlan.dayTotal, 0);
   const outboundDateObject = parseYmdDate(outboundDate);
   const onwardDateObject = parseYmdDate(onwardDate);
+  const segment1CheckOutDate = outboundDateObject ? addDays(outboundDateObject, Math.max(tripDays, 1)) : null;
   const minOnwardDate = outboundDateObject ? addDays(outboundDateObject, Math.max(tripDays, 0)) : null;
+  const segment2CheckOutDate = onwardDateObject ? addDays(onwardDateObject, Math.max(secondSegmentDays, 1)) : null;
   const onwardDateValid = !minOnwardDate || !onwardDateObject || onwardDateObject >= minOnwardDate;
   const onwardFlightCost = tripType === "continue" && showSecondFlight ? selectedOnwardFlight?.price || 0 : 0;
   const preContingencyTotal =
@@ -343,7 +380,8 @@ function Planner({ initialTrip, user, onSavePlan }) {
       sanitizeBudgetValue(dayPlan.foodBudget) > 0 &&
       sanitizeBudgetValue(dayPlan.transportBudget) > 0
   ).length;
-  const segment1Complete = Boolean(destination) && Boolean(selectedFlight) && segment1CompletedDays === tripDays;
+  const segment1Complete =
+    Boolean(destination) && Boolean(selectedFlight) && flightConfirmed && segment1CompletedDays === tripDays;
   const segment2IsActive = tripType === "continue" && showSecondFlight && onwardDestination;
   const segment2CompletedDays = resolvedSecondDailyPlans.filter(
     (dayPlan) =>
@@ -358,7 +396,7 @@ function Planner({ initialTrip, user, onSavePlan }) {
   const currentMission =
     !setupComplete
       ? "setup"
-      : !selectedFlight
+      : !selectedFlight || !flightConfirmed
         ? "flights"
         : !segment1Complete
           ? "itinerary-segment1"
@@ -366,7 +404,7 @@ function Planner({ initialTrip, user, onSavePlan }) {
             ? "continue-choice"
             : tripType === "continue" && !onwardDestination
               ? "continue-choice"
-              : tripType === "continue" && !selectedOnwardFlight
+              : tripType === "continue" && (!selectedOnwardFlight || !onwardFlightConfirmed)
                 ? "flights"
                 : segment2IsActive && !segment2Complete
                   ? "itinerary-segment2"
@@ -433,22 +471,28 @@ function Planner({ initialTrip, user, onSavePlan }) {
     const nextDestination = event.target.value;
     setDestination(nextDestination);
     setSelectedHostel(null);
+    setHotelResults([]);
     setSelectedPlaces([]);
     setSelectedFlight(null);
+    setFlightConfirmed(false);
     setOnwardFlightResults([]);
     setSelectedOnwardFlight(null);
+    setOnwardFlightConfirmed(false);
     setShowSecondFlight(false);
     setOnwardDestination("");
     setOnwardDate("");
     setSecondSegmentDays(3);
     setSecondDailyPlans(resizeDayPlans([], 3));
     setSecondSelectedHostel(null);
+    setSecondHotelResults([]);
     setFlightResults([]);
     setPlacesResults([]);
     setDailyPlans(resizeDayPlans([], tripDays));
     setFlightError("");
     setOnwardFlightError("");
     setPlacesError("");
+    setHotelsError("");
+    setSecondHotelsError("");
     const cachedPlaces = placesCacheRef.current.get(nextDestination);
     if (cachedPlaces) setPlacesResults(cachedPlaces);
     if (departureCity === nextDestination) setDepartureCity("");
@@ -461,22 +505,28 @@ function Planner({ initialTrip, user, onSavePlan }) {
     if (!filteredDestinations.includes(destination)) {
       setDestination("");
       setSelectedHostel(null);
+      setHotelResults([]);
       setSelectedPlaces([]);
       setSelectedFlight(null);
+      setFlightConfirmed(false);
       setOnwardFlightResults([]);
       setSelectedOnwardFlight(null);
+      setOnwardFlightConfirmed(false);
       setShowSecondFlight(false);
       setOnwardDestination("");
       setOnwardDate("");
       setSecondSegmentDays(3);
       setSecondDailyPlans(resizeDayPlans([], 3));
       setSecondSelectedHostel(null);
+      setSecondHotelResults([]);
       setFlightResults([]);
       setPlacesResults([]);
       setDailyPlans(resizeDayPlans([], tripDays));
       setFlightError("");
       setOnwardFlightError("");
       setPlacesError("");
+      setHotelsError("");
+      setSecondHotelsError("");
     }
   };
 
@@ -487,6 +537,9 @@ function Planner({ initialTrip, user, onSavePlan }) {
       : Math.max(1, Math.min(MAX_TRIP_DAYS, Math.round(requestedDays)));
     setTripDays(safeDays);
     setDailyPlans((previous) => resizeDayPlans(previous, safeDays));
+    setHotelResults([]);
+    setSelectedHostel(null);
+    setHotelsError("");
   };
   const handleSecondSegmentDaysChange = (event) => {
     const requestedDays = Number(event.target.value);
@@ -495,6 +548,9 @@ function Planner({ initialTrip, user, onSavePlan }) {
       : Math.max(1, Math.min(MAX_TRIP_DAYS, Math.round(requestedDays)));
     setSecondSegmentDays(safeDays);
     setSecondDailyPlans((previous) => resizeDayPlans(previous, safeDays));
+    setSecondHotelResults([]);
+    setSecondSelectedHostel(null);
+    setSecondHotelsError("");
   };
 
   const handleTripTypeChange = (event) => {
@@ -505,11 +561,14 @@ function Planner({ initialTrip, user, onSavePlan }) {
       setOnwardDate("");
       setOnwardFlightResults([]);
       setSelectedOnwardFlight(null);
+      setOnwardFlightConfirmed(false);
       setOnwardFlightError("");
       setShowSecondFlight(false);
       setSecondSegmentDays(3);
       setSecondDailyPlans(resizeDayPlans([], 3));
       setSecondSelectedHostel(null);
+      setSecondHotelResults([]);
+      setSecondHotelsError("");
     }
   };
 
@@ -551,22 +610,49 @@ function Planner({ initialTrip, user, onSavePlan }) {
       })
     );
   };
+  const getAvailableDayPlaces = (dayIndex) => {
+    const usedByOtherDays = new Set(
+      dailyPlans.flatMap((plan, planIndex) => (planIndex === dayIndex ? [] : plan.placeNames))
+    );
+    return selectedPlaces.filter(
+      (place) => dailyPlans[dayIndex]?.placeNames.includes(place.place) || !usedByOtherDays.has(place.place)
+    );
+  };
+  const getAvailableSecondDayPlaces = (dayIndex) => {
+    const usedByOtherDays = new Set(
+      secondDailyPlans.flatMap((plan, planIndex) => (planIndex === dayIndex ? [] : plan.placeNames))
+    );
+    return secondSegmentPlaces.filter(
+      (place) => secondDailyPlans[dayIndex]?.placeNames.includes(place.place) || !usedByOtherDays.has(place.place)
+    );
+  };
+
+  const preserveScrollPosition = (updateFn) => {
+    const scrollTop = window.scrollY;
+    updateFn();
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: scrollTop, behavior: "auto" });
+    });
+  };
 
   const applySelectedHostelToAllDays = () => {
     if (!selectedHostel) return;
-    setDailyPlans((previous) =>
-      previous.map((plan, index) => ({
-        ...plan,
-        stayName: selectedHostel.name,
-        sameAsPrevious: index > 0,
-      }))
-    );
+    preserveScrollPosition(() => {
+      setDailyPlans((previous) =>
+        previous.map((plan, index) => ({
+          ...plan,
+          stayName: selectedHostel.name,
+          sameAsPrevious: index > 0,
+        }))
+      );
+    });
   };
 
   const handleFlightSearch = async () => {
     if (!destination || !departureCity) {
       setFlightResults([]);
       setSelectedFlight(null);
+      setFlightConfirmed(false);
       setFlightError("Select both Flight 1 From and Flight 1 To.");
       return;
     }
@@ -575,7 +661,8 @@ function Planner({ initialTrip, user, onSavePlan }) {
     const cachedFlights = flightCacheRef.current.get(cacheKey);
     if (cachedFlights) {
       setFlightResults(cachedFlights);
-      setSelectedFlight([...cachedFlights].sort((a, b) => a.price - b.price)[0] || null);
+      setSelectedFlight(null);
+      setFlightConfirmed(false);
       setFlightError("");
       return;
     }
@@ -609,11 +696,12 @@ function Planner({ initialTrip, user, onSavePlan }) {
 
       flightCacheRef.current.set(cacheKey, results);
       setFlightResults(results);
-      const lowest = [...results].sort((a, b) => a.price - b.price)[0];
-      setSelectedFlight(lowest || null);
+      setSelectedFlight(null);
+      setFlightConfirmed(false);
     } catch (error) {
       setFlightResults([]);
       setSelectedFlight(null);
+      setFlightConfirmed(false);
       setFlightError(error.message || "Unable to fetch flights.");
     } finally {
       setFlightLoading(false);
@@ -621,61 +709,49 @@ function Planner({ initialTrip, user, onSavePlan }) {
   };
   const applySecondSelectedHostelToAllDays = () => {
     if (!secondSelectedHostel) return;
-    setSecondDailyPlans((previous) =>
-      previous.map((plan, index) => ({
-        ...plan,
-        stayName: secondSelectedHostel.name,
-        sameAsPrevious: index > 0,
-      }))
-    );
+    preserveScrollPosition(() => {
+      setSecondDailyPlans((previous) =>
+        previous.map((plan, index) => ({
+          ...plan,
+          stayName: secondSelectedHostel.name,
+          sameAsPrevious: index > 0,
+        }))
+      );
+    });
   };
   const copyDayOneTemplateToAll = () => {
     if (dailyPlans.length === 0) return;
     const dayOne = dailyPlans[0];
-    setDailyPlans((previous) =>
-      previous.map((plan, index) => ({
-        ...plan,
-        stayName: dayOne.stayName,
-        sameAsPrevious: index > 0,
-        placeNames: [...dayOne.placeNames],
-        foodBudget: dayOne.foodBudget,
-        transportBudget: dayOne.transportBudget,
-      }))
-    );
-  };
-  const copyDayOnePlacesToAllDays = () => {
-    if (dailyPlans.length === 0) return;
-    const dayOnePlaces = dailyPlans[0].placeNames || [];
-    setDailyPlans((previous) =>
-      previous.map((plan) => ({
-        ...plan,
-        placeNames: [...dayOnePlaces],
-      }))
-    );
+    const dayOneResolvedStay = resolvedDailyPlans[0]?.stayNameResolved || dayOne.stayName;
+    preserveScrollPosition(() => {
+      setDailyPlans((previous) =>
+        previous.map((plan, index) => ({
+          ...plan,
+          stayName: dayOneResolvedStay,
+          sameAsPrevious: false,
+          placeNames: index === 0 ? [...dayOne.placeNames] : [],
+          foodBudget: dayOne.foodBudget,
+          transportBudget: dayOne.transportBudget,
+        }))
+      );
+    });
   };
   const copySecondDayOneTemplateToAll = () => {
     if (secondDailyPlans.length === 0) return;
     const dayOne = secondDailyPlans[0];
-    setSecondDailyPlans((previous) =>
-      previous.map((plan, index) => ({
-        ...plan,
-        stayName: dayOne.stayName,
-        sameAsPrevious: index > 0,
-        placeNames: [...dayOne.placeNames],
-        foodBudget: dayOne.foodBudget,
-        transportBudget: dayOne.transportBudget,
-      }))
-    );
-  };
-  const copySecondDayOnePlacesToAll = () => {
-    if (secondDailyPlans.length === 0) return;
-    const dayOnePlaces = secondDailyPlans[0].placeNames || [];
-    setSecondDailyPlans((previous) =>
-      previous.map((plan) => ({
-        ...plan,
-        placeNames: [...dayOnePlaces],
-      }))
-    );
+    const dayOneResolvedStay = resolvedSecondDailyPlans[0]?.stayNameResolved || dayOne.stayName;
+    preserveScrollPosition(() => {
+      setSecondDailyPlans((previous) =>
+        previous.map((plan, index) => ({
+          ...plan,
+          stayName: dayOneResolvedStay,
+          sameAsPrevious: false,
+          placeNames: index === 0 ? [...dayOne.placeNames] : [],
+          foodBudget: dayOne.foodBudget,
+          transportBudget: dayOne.transportBudget,
+        }))
+      );
+    });
   };
 
   const handleOnwardFlightSearch = async () => {
@@ -685,12 +761,14 @@ function Planner({ initialTrip, user, onSavePlan }) {
     if (!destination || !onwardDestination) {
       setOnwardFlightResults([]);
       setSelectedOnwardFlight(null);
+      setOnwardFlightConfirmed(false);
       setOnwardFlightError("Select both Flight 2 From and Flight 2 To.");
       return;
     }
     if (!onwardDateValid) {
       setOnwardFlightResults([]);
       setSelectedOnwardFlight(null);
+      setOnwardFlightConfirmed(false);
       setOnwardFlightError("Date you leave must be on/after your last day in segment 1.");
       return;
     }
@@ -699,7 +777,8 @@ function Planner({ initialTrip, user, onSavePlan }) {
     const cachedFlights = flightCacheRef.current.get(cacheKey);
     if (cachedFlights) {
       setOnwardFlightResults(cachedFlights);
-      setSelectedOnwardFlight([...cachedFlights].sort((a, b) => a.price - b.price)[0] || null);
+      setSelectedOnwardFlight(null);
+      setOnwardFlightConfirmed(false);
       setOnwardFlightError("");
       return;
     }
@@ -740,11 +819,12 @@ function Planner({ initialTrip, user, onSavePlan }) {
 
       flightCacheRef.current.set(cacheKey, results);
       setOnwardFlightResults(results);
-      const lowest = [...results].sort((a, b) => a.price - b.price)[0];
-      setSelectedOnwardFlight(lowest || null);
+      setSelectedOnwardFlight(null);
+      setOnwardFlightConfirmed(false);
     } catch (error) {
       setOnwardFlightResults([]);
       setSelectedOnwardFlight(null);
+      setOnwardFlightConfirmed(false);
       setOnwardFlightError(error.message || "Unable to fetch onward flights.");
     } finally {
       setOnwardFlightLoading(false);
@@ -777,6 +857,96 @@ function Planner({ initialTrip, user, onSavePlan }) {
       setPlacesError(error.message || "Unable to fetch places.");
     } finally {
       setPlacesLoading(false);
+    }
+  };
+
+  const handleLoadHotels = async () => {
+    if (!destination || !outboundDateObject || !segment1CheckOutDate) {
+      setHotelResults([]);
+      setSelectedHostel(null);
+      setHotelsError("Select destination, start date, and number of days first.");
+      return;
+    }
+
+    const checkInDate = outboundDateObject.toISOString().slice(0, 10);
+    const checkOutDate = segment1CheckOutDate.toISOString().slice(0, 10);
+    const cacheKey = `${destination}|${checkInDate}|${checkOutDate}|${passengers}`;
+    const cachedHotels = hotelsCacheRef.current.get(cacheKey);
+    if (cachedHotels) {
+      setHotelResults(cachedHotels);
+      setHotelsError("");
+      return;
+    }
+
+    setHotelsLoading(true);
+    setHotelsError("");
+    try {
+      const query = new URLSearchParams({
+        destination,
+        checkInDate,
+        checkOutDate,
+        adults: String(passengers),
+      });
+      const response = await fetch(`${apiBaseUrl}/api/search/hotels?${query.toString()}`);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to fetch stays.");
+
+      const apiHotels = Array.isArray(data.hotels) ? data.hotels : [];
+      if (apiHotels.length === 0) {
+        setHotelsError("No live stays found. Showing saved budget stays instead.");
+      }
+      hotelsCacheRef.current.set(cacheKey, apiHotels);
+      setHotelResults(apiHotels);
+    } catch (error) {
+      setHotelResults([]);
+      setHotelsError(error.message || "Unable to fetch stays.");
+    } finally {
+      setHotelsLoading(false);
+    }
+  };
+
+  const handleLoadSecondHotels = async () => {
+    if (!onwardDestination || !onwardDateObject || !segment2CheckOutDate) {
+      setSecondHotelResults([]);
+      setSecondSelectedHostel(null);
+      setSecondHotelsError("Select next destination, leave date, and segment 2 days first.");
+      return;
+    }
+
+    const checkInDate = onwardDateObject.toISOString().slice(0, 10);
+    const checkOutDate = segment2CheckOutDate.toISOString().slice(0, 10);
+    const cacheKey = `segment2|${onwardDestination}|${checkInDate}|${checkOutDate}|${passengers}`;
+    const cachedHotels = hotelsCacheRef.current.get(cacheKey);
+    if (cachedHotels) {
+      setSecondHotelResults(cachedHotels);
+      setSecondHotelsError("");
+      return;
+    }
+
+    setSecondHotelsLoading(true);
+    setSecondHotelsError("");
+    try {
+      const query = new URLSearchParams({
+        destination: onwardDestination,
+        checkInDate,
+        checkOutDate,
+        adults: String(passengers),
+      });
+      const response = await fetch(`${apiBaseUrl}/api/search/hotels?${query.toString()}`);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to fetch segment 2 stays.");
+
+      const apiHotels = Array.isArray(data.hotels) ? data.hotels : [];
+      if (apiHotels.length === 0) {
+        setSecondHotelsError("No live stays found. Showing saved budget stays instead.");
+      }
+      hotelsCacheRef.current.set(cacheKey, apiHotels);
+      setSecondHotelResults(apiHotels);
+    } catch (error) {
+      setSecondHotelResults([]);
+      setSecondHotelsError(error.message || "Unable to fetch segment 2 stays.");
+    } finally {
+      setSecondHotelsLoading(false);
     }
   };
 
@@ -857,6 +1027,93 @@ function Planner({ initialTrip, user, onSavePlan }) {
           }
         : null,
   };
+
+  const draftPayload = useMemo(
+    () => ({
+      destinationFilter,
+      destination,
+      selectedHostel,
+      departureCity,
+      tripType,
+      passengers,
+      flightResults,
+      selectedFlight,
+      flightConfirmed,
+      onwardDestination,
+      onwardDate,
+      onwardFlightResults,
+      selectedOnwardFlight,
+      onwardFlightConfirmed,
+      onwardFlightSort,
+      flightSort,
+      selectedPlaces,
+      placesResults,
+      hotelResults,
+      secondHotelResults,
+      tripDays,
+      dailyPlans,
+      secondSegmentDays,
+      secondDailyPlans,
+      secondSelectedHostel,
+      segment1DailyTarget,
+      segment1MaxBudget,
+      segment2DailyTarget,
+      segment2MaxBudget,
+      includeContingency,
+      contingencyPercent,
+      outboundDate,
+      updatedAt: new Date().toISOString(),
+    }),
+    [
+      destinationFilter,
+      destination,
+      selectedHostel,
+      departureCity,
+      tripType,
+      passengers,
+      flightResults,
+      selectedFlight,
+      flightConfirmed,
+      onwardDestination,
+      onwardDate,
+      onwardFlightResults,
+      selectedOnwardFlight,
+      onwardFlightConfirmed,
+      onwardFlightSort,
+      flightSort,
+      selectedPlaces,
+      placesResults,
+      hotelResults,
+      secondHotelResults,
+      tripDays,
+      dailyPlans,
+      secondSegmentDays,
+      secondDailyPlans,
+      secondSelectedHostel,
+      segment1DailyTarget,
+      segment1MaxBudget,
+      segment2DailyTarget,
+      segment2MaxBudget,
+      includeContingency,
+      contingencyPercent,
+      outboundDate,
+    ]
+  );
+
+  useEffect(() => {
+    if (typeof onDraftChange !== "function") {
+      return undefined;
+    }
+
+    const autosaveTimer = window.setTimeout(() => {
+      onDraftChange(draftPayload);
+    }, 300);
+
+    return () => window.clearTimeout(autosaveTimer);
+  }, [
+    draftPayload,
+    onDraftChange,
+  ]);
 
   const handleSavePlan = () => {
     try {
@@ -1025,6 +1282,16 @@ function Planner({ initialTrip, user, onSavePlan }) {
               </div>
             </div>
             <p className="planner-selected-hostel">Current estimate: {formatInr(totalCost)}</p>
+            {selectedFlight && flightConfirmed && (
+              <button type="button" className="planner-back-btn" onClick={() => setFlightConfirmed(false)}>
+                Change Flight 1
+              </button>
+            )}
+            {selectedOnwardFlight && onwardFlightConfirmed && (
+              <button type="button" className="planner-back-btn" onClick={() => setOnwardFlightConfirmed(false)}>
+                Change Flight 2
+              </button>
+            )}
             {guideMessage && <p className="planner-inline-error">{guideMessage}</p>}
           </div>
 
@@ -1163,7 +1430,10 @@ function Planner({ initialTrip, user, onSavePlan }) {
                         type="radio"
                         name="flight-option"
                         checked={selectedFlight?.id === flight.id}
-                        onChange={() => setSelectedFlight(flight)}
+                        onChange={() => {
+                          setSelectedFlight(flight);
+                          setFlightConfirmed(false);
+                        }}
                       />
                       <div>
                         <p>{flight.airline}</p>
@@ -1179,9 +1449,16 @@ function Planner({ initialTrip, user, onSavePlan }) {
                   ))}
                 </div>
                 {selectedFlight && (
-                  <p className="planner-selected-hostel">
-                    Selected Flight 1: {selectedFlight.airline} ({formatInr(selectedFlight.price)})
-                  </p>
+                  <>
+                    <p className="planner-selected-hostel">
+                      Selected Flight 1: {selectedFlight.airline} ({formatInr(selectedFlight.price)})
+                    </p>
+                    {!flightConfirmed && (
+                      <button type="button" className="planner-button" onClick={() => setFlightConfirmed(true)}>
+                        Confirm Flight 1
+                      </button>
+                    )}
+                  </>
                 )}
               </>
             )}
@@ -1262,7 +1539,10 @@ function Planner({ initialTrip, user, onSavePlan }) {
                                 type="radio"
                                 name="onward-flight-option"
                                 checked={selectedOnwardFlight?.id === flight.id}
-                                onChange={() => setSelectedOnwardFlight(flight)}
+                                onChange={() => {
+                                  setSelectedOnwardFlight(flight);
+                                  setOnwardFlightConfirmed(false);
+                                }}
                               />
                               <div>
                                 <p>{flight.airline}</p>
@@ -1278,9 +1558,20 @@ function Planner({ initialTrip, user, onSavePlan }) {
                           ))}
                         </div>
                         {selectedOnwardFlight && (
-                          <p className="planner-selected-hostel">
-                            Selected Flight 2: {selectedOnwardFlight.airline} ({formatInr(selectedOnwardFlight.price)})
-                          </p>
+                          <>
+                            <p className="planner-selected-hostel">
+                              Selected Flight 2: {selectedOnwardFlight.airline} ({formatInr(selectedOnwardFlight.price)})
+                            </p>
+                            {!onwardFlightConfirmed && (
+                              <button
+                                type="button"
+                                className="planner-button"
+                                onClick={() => setOnwardFlightConfirmed(true)}
+                              >
+                                Confirm Flight 2
+                              </button>
+                            )}
+                          </>
                         )}
                       </>
                     )}
@@ -1412,12 +1703,33 @@ function Planner({ initialTrip, user, onSavePlan }) {
             <>
               <div className="planner-subcard">
                 <h3 className="planner-subtitle">Hostel / Stay</h3>
+                <button type="button" className="planner-button" onClick={handleLoadHotels}>
+                  {hotelsLoading ? "Loading Stays..." : "Load Live Stays"}
+                </button>
+                {hotelsError && <p className="planner-inline-error">{hotelsError}</p>}
                 <div className="planner-hostel-list">
                   {hostels.map((hostel) => (
-                    <div className="planner-hostel-row" key={hostel.name}>
+                    <div className="planner-hostel-row" key={hostel.id || hostel.name}>
                       <div>
                         <p className="planner-hostel-name">{hostel.name}</p>
                         <p className="planner-hostel-price">{formatInr(hostel.price)} / night</p>
+                        {(hostel.rating || hostel.reviews || hostel.source) && (
+                          <p className="planner-day-note">
+                            {hostel.rating ? `${hostel.rating} rating` : ""}
+                            {hostel.rating && hostel.reviews ? " | " : ""}
+                            {hostel.reviews ? `${hostel.reviews} reviews` : ""}
+                            {(hostel.rating || hostel.reviews) && hostel.source ? " | " : ""}
+                            {hostel.source || ""}
+                          </p>
+                        )}
+                        {hostel.amenities?.length > 0 && (
+                          <p className="planner-day-note">{hostel.amenities.join(" | ")}</p>
+                        )}
+                        {hostel.link && (
+                          <a className="planner-stay-link" href={hostel.link} target="_blank" rel="noreferrer">
+                            View deal
+                          </a>
+                        )}
                       </div>
                       <button
                         type="button"
@@ -1469,7 +1781,7 @@ function Planner({ initialTrip, user, onSavePlan }) {
                   min="0"
                   className="planner-select"
                   value={segment1DailyTarget}
-                  onChange={(event) => setSegment1DailyTarget(sanitizeBudgetValue(event.target.value))}
+                  onChange={(event) => setSegment1DailyTarget(sanitizeBudgetInput(event.target.value))}
                 />
                 <label className="planner-label" htmlFor="segment1-max-budget">
                   Segment 1 max budget (INR)
@@ -1480,14 +1792,13 @@ function Planner({ initialTrip, user, onSavePlan }) {
                   min="0"
                   className="planner-select"
                   value={segment1MaxBudget}
-                  onChange={(event) => setSegment1MaxBudget(sanitizeBudgetValue(event.target.value))}
+                  onChange={(event) => setSegment1MaxBudget(sanitizeBudgetInput(event.target.value))}
                 />
-                <button type="button" className="planner-button" onClick={copyDayOneTemplateToAll}>
-                  Copy Day 1 to all days
-                </button>
-                <button type="button" className="planner-button" onClick={copyDayOnePlacesToAllDays}>
-                  Copy Day 1 places to all days
-                </button>
+                <div className="planner-inline-actions">
+                  <button type="button" className="planner-button" onClick={copyDayOneTemplateToAll}>
+                    Copy Day 1 stay & budgets
+                  </button>
+                </div>
 
                 <div className="planner-days-list">
                   {dailyPlans.map((plan, index) => {
@@ -1539,7 +1850,7 @@ function Planner({ initialTrip, user, onSavePlan }) {
 
                         <p className="planner-label">Places for this day</p>
                         <div className="planner-day-places-grid">
-                          {topPlaces.map((place) => {
+                          {getAvailableDayPlaces(index).map((place) => {
                             const isDayPlaceSelected = plan.placeNames.includes(place.place);
                             return (
                               <button
@@ -1553,6 +1864,12 @@ function Planner({ initialTrip, user, onSavePlan }) {
                             );
                           })}
                         </div>
+                        {selectedPlaces.length === 0 && (
+                          <p className="planner-day-note">Shortlist places above to assign them to days.</p>
+                        )}
+                        {selectedPlaces.length > 0 && getAvailableDayPlaces(index).length === 0 && (
+                          <p className="planner-day-note">All shortlisted places are already assigned to other days.</p>
+                        )}
 
                         <label className="planner-label" htmlFor={`food-budget-${plan.dayNumber}`}>
                           Food budget
@@ -1563,7 +1880,7 @@ function Planner({ initialTrip, user, onSavePlan }) {
                           min="0"
                           className="planner-select"
                           value={plan.foodBudget}
-                          onChange={(event) => updateDayPlan(index, { foodBudget: sanitizeBudgetValue(event.target.value) })}
+                          onChange={(event) => updateDayPlan(index, { foodBudget: sanitizeBudgetInput(event.target.value) })}
                         />
 
                         <label className="planner-label" htmlFor={`transport-budget-${plan.dayNumber}`}>
@@ -1576,7 +1893,7 @@ function Planner({ initialTrip, user, onSavePlan }) {
                           className="planner-select"
                           value={plan.transportBudget}
                           onChange={(event) =>
-                            updateDayPlan(index, { transportBudget: sanitizeBudgetValue(event.target.value) })
+                            updateDayPlan(index, { transportBudget: sanitizeBudgetInput(event.target.value) })
                           }
                         />
 
@@ -1650,7 +1967,7 @@ function Planner({ initialTrip, user, onSavePlan }) {
                     min="0"
                     className="planner-select"
                     value={segment2DailyTarget}
-                    onChange={(event) => setSegment2DailyTarget(sanitizeBudgetValue(event.target.value))}
+                    onChange={(event) => setSegment2DailyTarget(sanitizeBudgetInput(event.target.value))}
                   />
                   <label className="planner-label" htmlFor="segment2-max-budget">
                     Segment 2 max budget (INR)
@@ -1661,14 +1978,35 @@ function Planner({ initialTrip, user, onSavePlan }) {
                     min="0"
                     className="planner-select"
                     value={segment2MaxBudget}
-                    onChange={(event) => setSegment2MaxBudget(sanitizeBudgetValue(event.target.value))}
+                    onChange={(event) => setSegment2MaxBudget(sanitizeBudgetInput(event.target.value))}
                   />
+                  <button type="button" className="planner-button" onClick={handleLoadSecondHotels}>
+                    {secondHotelsLoading ? "Loading Segment 2 Stays..." : "Load Live Segment 2 Stays"}
+                  </button>
+                  {secondHotelsError && <p className="planner-inline-error">{secondHotelsError}</p>}
                   <div className="planner-hostel-list">
                     {secondSegmentHostels.map((hostel) => (
-                      <div className="planner-hostel-row" key={`segment2-${hostel.name}`}>
+                      <div className="planner-hostel-row" key={`segment2-${hostel.id || hostel.name}`}>
                         <div>
                           <p className="planner-hostel-name">{hostel.name}</p>
                           <p className="planner-hostel-price">{formatInr(hostel.price)} / night</p>
+                          {(hostel.rating || hostel.reviews || hostel.source) && (
+                            <p className="planner-day-note">
+                              {hostel.rating ? `${hostel.rating} rating` : ""}
+                              {hostel.rating && hostel.reviews ? " | " : ""}
+                              {hostel.reviews ? `${hostel.reviews} reviews` : ""}
+                              {(hostel.rating || hostel.reviews) && hostel.source ? " | " : ""}
+                              {hostel.source || ""}
+                            </p>
+                          )}
+                          {hostel.amenities?.length > 0 && (
+                            <p className="planner-day-note">{hostel.amenities.join(" | ")}</p>
+                          )}
+                          {hostel.link && (
+                            <a className="planner-stay-link" href={hostel.link} target="_blank" rel="noreferrer">
+                              View deal
+                            </a>
+                          )}
                         </div>
                         <button
                           type="button"
@@ -1687,12 +2025,11 @@ function Planner({ initialTrip, user, onSavePlan }) {
                       Apply selected stay to all segment 2 days
                     </button>
                   )}
-                  <button type="button" className="planner-button" onClick={copySecondDayOneTemplateToAll}>
-                    Copy Segment 2 Day 1 to all
-                  </button>
-                  <button type="button" className="planner-button" onClick={copySecondDayOnePlacesToAll}>
-                    Copy Segment 2 Day 1 places to all
-                  </button>
+                  <div className="planner-inline-actions">
+                    <button type="button" className="planner-button" onClick={copySecondDayOneTemplateToAll}>
+                      Copy Segment 2 Day 1 stay & budgets
+                    </button>
+                  </div>
 
                   <div className="planner-days-list">
                     {secondDailyPlans.map((plan, index) => {
@@ -1743,7 +2080,7 @@ function Planner({ initialTrip, user, onSavePlan }) {
                           )}
                           <p className="planner-label">Places for this day</p>
                           <div className="planner-day-places-grid">
-                            {secondSegmentPlaces.map((place) => {
+                            {getAvailableSecondDayPlaces(index).map((place) => {
                               const isSelected = plan.placeNames.includes(place.place);
                               return (
                                 <button
@@ -1757,6 +2094,9 @@ function Planner({ initialTrip, user, onSavePlan }) {
                               );
                             })}
                           </div>
+                          {getAvailableSecondDayPlaces(index).length === 0 && (
+                            <p className="planner-day-note">All segment 2 places are already assigned to other days.</p>
+                          )}
                           <label className="planner-label" htmlFor={`segment2-food-budget-${plan.dayNumber}`}>
                             Food budget
                           </label>
@@ -1768,7 +2108,7 @@ function Planner({ initialTrip, user, onSavePlan }) {
                             value={plan.foodBudget}
                             onChange={(event) =>
                               updateSecondDayPlan(index, {
-                                foodBudget: sanitizeBudgetValue(event.target.value),
+                                foodBudget: sanitizeBudgetInput(event.target.value),
                               })
                             }
                           />
@@ -1783,7 +2123,7 @@ function Planner({ initialTrip, user, onSavePlan }) {
                             value={plan.transportBudget}
                             onChange={(event) =>
                               updateSecondDayPlan(index, {
-                                transportBudget: sanitizeBudgetValue(event.target.value),
+                                transportBudget: sanitizeBudgetInput(event.target.value),
                               })
                             }
                           />
@@ -1864,7 +2204,7 @@ function Planner({ initialTrip, user, onSavePlan }) {
                       max="50"
                       className="planner-select"
                       value={contingencyPercent}
-                      onChange={(event) => setContingencyPercent(sanitizeBudgetValue(event.target.value))}
+                      onChange={(event) => setContingencyPercent(sanitizeBudgetInput(event.target.value))}
                     />
                   </>
                 )}
